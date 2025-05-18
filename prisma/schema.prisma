@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int             @id @default(autoincrement())
+  name              String
+  balance           Float           @default(0)
+  sentTransactions     Transaction[]    @relation("SenderRelation")
+  receivedTransactions Transaction[]    @relation("ReceiverRelation")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("users")
+}
+
+model Transaction {
+  id            Int       @id @default(autoincrement())
+  amount        Float
+  description   String?
+  status        String    @default("pending") // pending, completed, failed
+  sender        User      @relation("SenderRelation", fields: [senderId], references: [id])
+  senderId      Int
+  receiver      User      @relation("ReceiverRelation", fields: [receiverId], references: [id])
+  receiverId    Int
+  scheduledAt   DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("transactions")
+}
+
+model IdempotencyKey {
+  key       String   @id
+  response  String
+  createdAt DateTime @default(now())
+
+  @@map("idempotency_keys")
+} 
