@@ -1,23 +1,23 @@
-# Para Transfer Servisi
+# Money Transfer Service
 
-Bu proje, kullanıcılar arasında para transferi yapmaya olanak sağlayan tam kapsamlı bir API ve web arayüzü servisidir. Node.js, Express, TypeScript, SQLite, Prisma ve React kullanılarak geliştirilmiştir.
+This project is a comprehensive API and web interface service that allows money transfers between users. It is developed using Node.js, Express, TypeScript, SQLite, Prisma, and React.
 
-## Özellikler
+## Features
 
-- Kullanıcılar arasında anlık para transferi
-- Zamanlı transferler oluşturma
-- İşlem geçmişi görüntüleme 
-- Idempotent API desteği
-- Transaction desteği ile atomik işlemler
-- Modern ve kullanıcı dostu arayüz
+- Instant money transfers between users
+- Scheduled transfers
+- Transaction history viewing
+- Idempotent API support
+- Atomic transactions
+- Modern and user-friendly interface
 
-## Teknoloji Stack
+## Technology Stack
 
 ### Backend
 - Node.js + TypeScript
 - Express.js
 - SQLite (Prisma ORM)
-- Winston (Loglama)
+- Winston (Logging)
 
 ### Frontend
 - React + TypeScript
@@ -25,78 +25,78 @@ Bu proje, kullanıcılar arasında para transferi yapmaya olanak sağlayan tam k
 - Mantine UI
 - Axios
 
-## Gereksinimler
+## Requirements
 
-- Node.js (v14 veya üzeri)
-- npm veya yarn
+- Node.js (v14 or higher)
+- npm or yarn
 
-## Kurulum
+## Installation
 
-1. Projeyi klonlayın:
+1. Clone the project:
 ```bash
 git clone <repo-url>
-cd para-transfer-api
+cd money-transfer-service
 ```
 
-2. Backend bağımlılıkları yükleyin ve veritabanını oluşturun:
+2. Install backend dependencies and set up the database:
 ```bash
 npm install
 npx prisma migrate dev --name init
 npm run seed
 ```
 
-3. Frontend bağımlılıkları yükleyin:
+3. Install frontend dependencies:
 ```bash
 cd client
 npm install
 ```
 
-## Çalıştırma
+## Running the Application
 
 ### Backend 
-Geliştirme modunda başlatmak için:
+To start in development mode:
 ```bash
-# Ana klasörde
+# In the root directory
 npm run dev
 ```
 
 ### Frontend
-Geliştirme modunda başlatmak için:
+To start in development mode:
 ```bash
-# client klasöründe
+# In the client directory
 npm run dev
 ```
 
-Backend varsayılan olarak 3000 portunda, frontend ise 5173 portunda çalışır.
+The backend runs on port 3000 by default, and the frontend runs on port 5173.
 
-## API Endpointleri
+## API Endpoints
 
-### Kullanıcılar
+### Users
 
-#### Tüm kullanıcıları getir
+#### Get all users
 ```
 GET /api/users
 ```
 
-#### Kullanıcı detayı getir
+#### Get user details
 ```
 GET /api/users/:id
 ```
 
-#### Yeni kullanıcı oluştur
+#### Create a new user
 ```
 POST /api/users
 ```
 ```json
 {
-  "name": "Kullanıcı Adı",
+  "name": "User Name",
   "balance": 1000
 }
 ```
 
-### Transferler
+### Transfers
 
-#### Para transferi yap
+#### Make a transfer
 ```
 POST /api/transfer
 ```
@@ -105,49 +105,49 @@ POST /api/transfer
   "senderId": 1,
   "receiverId": 2,
   "amount": 500,
-  "description": "Ödeme açıklaması",
-  "scheduledAt": "2023-12-31T10:00:00Z" // Opsiyonel
+  "description": "Payment description",
+  "scheduledAt": "2023-12-31T10:00:00Z" // Optional
 }
 ```
 
-Idempotency için:
+For idempotency:
 ```
 POST /api/transfer
 Idempotency-Key: unique-operation-id
 ```
 
-#### İşlem geçmişi getir
+#### Get transaction history
 ```
 GET /api/transactions?user_id=1
 ```
 
-## Transfer Kuralları
+## Transfer Rules
 
-- Gönderenin bakiyesi, transfer tutarı için yeterli olmalıdır
-- Transfer tutarı 0'dan büyük olmalıdır
-- Kullanıcı kendisine transfer yapamaz
-- Zamanlı transferler, planlanan zamanda otomatik olarak gerçekleştirilir
+- The sender's balance must be sufficient for the transfer amount
+- The transfer amount must be greater than 0
+- A user cannot transfer money to themselves
+- Scheduled transfers are automatically executed at the planned time
 
-## Ekran Görüntüleri
+## Screenshots
 
-*[Ekran görüntüleri buraya eklenebilir]*
+*[Screenshots can be added here]*
 
-## Test
+## Testing
 
-Backend testlerini çalıştırmak için:
+To run backend tests:
 ```bash
-# Ana klasörde
+# In the root directory
 npm test
 ```
 
-## Katkıda Bulunma
+## Contributing
 
-1. Bu repo'yu fork edin
-2. Feature branch'i oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add some amazing feature'`)
-4. Branch'e push edin (`git push origin feature/amazing-feature`)
-5. Pull Request açın
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Lisans
+## License
 
-Bu proje [MIT](LICENSE) lisansı altında lisanslanmıştır. 
+This project is licensed under the [MIT](LICENSE) License. 
