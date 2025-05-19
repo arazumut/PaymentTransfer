@@ -21,12 +21,11 @@ import {
 import { 
   IconCreditCard, 
   IconArrowRight, 
-  IconArrowUp, 
-  IconArrowDown, 
   IconChartBar, 
   IconCoin, 
   IconUsers,
-  IconStar
+  IconStar,
+  IconUserCircle
 } from '@tabler/icons-react';
 import { 
   LineChart, 
@@ -35,9 +34,7 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip as RechartsTooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar
+  ResponsiveContainer
 } from 'recharts';
 import { getUsers } from '../services/api';
 import type { User, ApiResponse } from '../types';
@@ -208,7 +205,7 @@ const Dashboard = () => {
           <Stack gap="md">
             {stats.recentTransactions.map((transaction) => (
               <Paper key={transaction.id} shadow="xs" p="md" withBorder>
-                <Group position="apart">
+                <Group justify="space-between">
                   <div>
                     <Text size="sm" fw={500}>{transaction.from} → {transaction.to}</Text>
                     <Text size="xs" c="dimmed">{transaction.date}</Text>
@@ -258,7 +255,7 @@ const Dashboard = () => {
           <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
             <Card shadow="sm" padding="lg" radius="md" withBorder component={Link} to="/profile" style={{ textDecoration: 'none' }}>
               <Group>
-                <IconUser size={24} color="violet" />
+                <IconUserCircle size={24} color="violet" />
                 <Text fw={500} size="lg">Profil Ayarları</Text>
               </Group>
               <Text mt="sm" c="dimmed" size="sm">
