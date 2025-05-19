@@ -129,7 +129,8 @@ GET /api/transactions?user_id=1
 - Scheduled transfers are automatically executed at the planned time
 
 ## Screenshots
-<img width="1082" alt="Ekran Resmi 2025-05-18 21 50 11" src="https://github.com/user-attachments/assets/57378307-a703-4606-b305-4f7f65365c61" />
+<img width="1710" alt="Ekran Resmi 2025-05-19 13 54 39" src="https://github.com/user-attachments/assets/15445f33-b78a-49c0-b7ef-d032a9497051" />
+
 
 <img width="1082" alt="Ekran Resmi 2025-05-18 21 49 58" src="https://github.com/user-attachments/assets/502a6222-ab0d-4da8-ac83-51b5e9b9119e" />
 
