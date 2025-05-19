@@ -10,9 +10,7 @@ import {
   Avatar, 
   ActionIcon,
   Tooltip,
-  Divider,
-  Badge,
-  rem
+  Divider
 } from '@mantine/core';
 import { 
   IconHome, 
@@ -22,9 +20,10 @@ import {
   IconMoon, 
   IconSun, 
   IconUser,
-  IconBell,
-  IconChevronRight
+  IconChevronRight,
+  IconStar
 } from '@tabler/icons-react';
+import NotificationsMenu from './NotificationsMenu';
 
 interface LayoutProps {
   toggleColorScheme: () => void;
@@ -37,6 +36,7 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
     { icon: <IconCreditCard size={20} />, label: 'Para Transferi', to: '/transfer' },
     { icon: <IconHistory size={20} />, label: 'İşlem Geçmişi', to: '/history' },
     { icon: <IconUser size={20} />, label: 'Profil Ayarları', to: '/profile' },
+    { icon: <IconStar size={20} />, label: 'Favori Alıcılar', to: '/favorites' },
   ];
 
   return (
@@ -51,14 +51,7 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
             <Title order={3} c="blue">Para Transfer</Title>
           </Group>
           <Group>
-            <Tooltip label="Bildirimler">
-              <ActionIcon variant="subtle" size="lg" radius="xl" pos="relative">
-                <IconBell size={20} />
-                <Badge size="xs" color="red" variant="filled" radius="xl" style={{ position: 'absolute', top: rem(1), right: rem(1) }}>
-                  3
-                </Badge>
-              </ActionIcon>
-            </Tooltip>
+            <NotificationsMenu />
             <Tooltip label={colorScheme === 'dark' ? 'Aydınlık Mod' : 'Karanlık Mod'}>
               <ActionIcon 
                 variant="subtle" 

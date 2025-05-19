@@ -42,7 +42,7 @@ const theme = createTheme({
 function App() {
   const [colorScheme, setColorScheme] = useLocalStorage({
     key: 'color-scheme',
-    defaultValue: 'light',
+    defaultValue: 'light' as 'light' | 'dark',
   });
 
   const toggleColorScheme = () => {
