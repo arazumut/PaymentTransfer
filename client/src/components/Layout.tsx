@@ -1,12 +1,42 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { AppShell, NavLink as MantineNavLink, Button, Title, Group, Text, Stack, Avatar } from '@mantine/core';
-import { IconHome, IconCreditCard, IconHistory, IconLogout } from '@tabler/icons-react';
+import { 
+  AppShell, 
+  NavLink as MantineNavLink, 
+  Button, 
+  Title, 
+  Group, 
+  Text, 
+  Stack, 
+  Avatar, 
+  ActionIcon,
+  Tooltip,
+  Divider,
+  Badge,
+  rem
+} from '@mantine/core';
+import { 
+  IconHome, 
+  IconCreditCard, 
+  IconHistory, 
+  IconLogout, 
+  IconMoon, 
+  IconSun, 
+  IconUser,
+  IconBell,
+  IconChevronRight
+} from '@tabler/icons-react';
 
-const Layout = () => {
+interface LayoutProps {
+  toggleColorScheme: () => void;
+  colorScheme: string;
+}
+
+const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
   const navLinks = [
     { icon: <IconHome size={20} />, label: 'Ana Sayfa', to: '/' },
     { icon: <IconCreditCard size={20} />, label: 'Para Transferi', to: '/transfer' },
     { icon: <IconHistory size={20} />, label: 'İşlem Geçmişi', to: '/history' },
+    { icon: <IconUser size={20} />, label: 'Profil Ayarları', to: '/profile' },
   ];
 
   return (
@@ -21,6 +51,23 @@ const Layout = () => {
             <Title order={3} c="blue">Para Transfer</Title>
           </Group>
           <Group>
+            <Tooltip label="Bildirimler">
+              <ActionIcon variant="subtle" size="lg" radius="xl" pos="relative">
+                <IconBell size={20} />
+                <Badge size="xs" color="red" variant="filled" radius="xl" style={{ position: 'absolute', top: rem(1), right: rem(1) }}>
+                  3
+                </Badge>
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label={colorScheme === 'dark' ? 'Aydınlık Mod' : 'Karanlık Mod'}>
+              <ActionIcon 
+                variant="subtle" 
+                size="lg" 
+                onClick={toggleColorScheme}
+              >
+                {colorScheme === 'dark' ? <IconSun size={20} /> : <IconMoon size={20} />}
+              </ActionIcon>
+            </Tooltip>
             <Button variant="subtle" leftSection={<IconLogout size={16} />}>
               Çıkış
             </Button>
@@ -30,13 +77,18 @@ const Layout = () => {
 
       <AppShell.Navbar p="md">
         <Stack gap="xs">
-          <Group mb="md">
-            <Avatar color="blue" radius="xl">UA</Avatar>
-            <div>
-              <Text fw={500}>Hoşgeldiniz</Text>
-              <Text size="xs" c="dimmed">Para Transfer Uygulaması</Text>
+          <Group mb="xs">
+            <Avatar color="blue" radius="xl" size="md">UA</Avatar>
+            <div style={{ flex: 1 }}>
+              <Text fw={500}>Umut Araz</Text>
+              <Text size="xs" c="dimmed">umut.araz@example.com</Text>
             </div>
+            <ActionIcon variant="subtle" component={NavLink} to="/profile">
+              <IconChevronRight size={16} />
+            </ActionIcon>
           </Group>
+
+          <Divider my="xs" />
 
           {navLinks.map((link) => (
             <MantineNavLink
@@ -48,6 +100,20 @@ const Layout = () => {
               active={link.to === window.location.pathname}
             />
           ))}
+          
+          <Divider my="xs" label="Hızlı Erişim" labelPosition="center" />
+          
+          <MantineNavLink
+            label="Son Transfer Edilen"
+            description="Ahmet Yılmaz"
+            rightSection={<IconChevronRight size={16} />}
+          />
+          
+          <MantineNavLink
+            label="Favori Alıcılar"
+            description="3 kişi"
+            rightSection={<IconChevronRight size={16} />}
+          />
         </Stack>
       </AppShell.Navbar>
 

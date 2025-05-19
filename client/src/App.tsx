@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { MantineProvider, createTheme } from '@mantine/core';
+import { MantineProvider, createTheme, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
+import { useLocalStorage } from '@mantine/hooks';
 
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
@@ -10,28 +11,61 @@ import Dashboard from './pages/Dashboard';
 import UserDetails from './pages/UserDetails';
 import TransferMoney from './pages/TransferMoney';
 import TransactionHistory from './pages/TransactionHistory';
+import ProfileSettings from './pages/ProfileSettings';
 
 const theme = createTheme({
   primaryColor: 'blue',
+  colors: {
+    blue: [
+      '#E6F7FF', '#BAE7FF', '#91D5FF', '#69C0FF', 
+      '#40A9FF', '#1890FF', '#096DD9', '#0050B3', 
+      '#003A8C', '#002766'
+    ],
+    green: [
+      '#F6FFED', '#D9F7BE', '#B7EB8F', '#95DE64', 
+      '#73D13D', '#52C41A', '#389E0D', '#237804', 
+      '#135200', '#092B00'
+    ],
+  },
   defaultRadius: 'md',
   fontFamily: 'Poppins, sans-serif',
+  components: {
+    Button: {
+      defaultProps: {
+        radius: 'md',
+      },
+    },
+  },
 });
 
 function App() {
+  const [colorScheme, setColorScheme] = useLocalStorage({
+    key: 'color-scheme',
+    defaultValue: 'light',
+  });
+
+  const toggleColorScheme = () => {
+    setColorScheme(colorScheme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
-    <MantineProvider theme={theme}>
-      <Notifications position="top-right" />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="users/:id" element={<UserDetails />} />
-            <Route path="transfer" element={<TransferMoney />} />
-            <Route path="history" element={<TransactionHistory />} />
-          </Route>
-        </Routes>
-      </Router>
-    </MantineProvider>
+    <>
+      <ColorSchemeScript />
+      <MantineProvider theme={theme} defaultColorScheme={colorScheme}>
+        <Notifications position="top-right" />
+        <Router>
+          <Routes>
+            <Route path="/" element={<Layout toggleColorScheme={toggleColorScheme} colorScheme={colorScheme} />}>
+              <Route index element={<Dashboard />} />
+              <Route path="users/:id" element={<UserDetails />} />
+              <Route path="transfer" element={<TransferMoney />} />
+              <Route path="history" element={<TransactionHistory />} />
+              <Route path="profile" element={<ProfileSettings />} />
+            </Route>
+          </Routes>
+        </Router>
+      </MantineProvider>
+    </>
   );
 }
 
