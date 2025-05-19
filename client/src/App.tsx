@@ -12,6 +12,7 @@ import UserDetails from './pages/UserDetails';
 import TransferMoney from './pages/TransferMoney';
 import TransactionHistory from './pages/TransactionHistory';
 import ProfileSettings from './pages/ProfileSettings';
+import FavoriteRecipients from './components/FavoriteRecipients';
 
 const theme = createTheme({
   primaryColor: 'blue',
@@ -61,6 +62,7 @@ function App() {
               <Route path="transfer" element={<TransferMoney />} />
               <Route path="history" element={<TransactionHistory />} />
               <Route path="profile" element={<ProfileSettings />} />
+              <Route path="favorites" element={<FavoriteRecipients />} />
             </Route>
           </Routes>
         </Router>
