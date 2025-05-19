@@ -86,7 +86,7 @@ const ProfileSettings = () => {
         <Title order={2}>Profil Ayarları</Title>
       </Group>
 
-      <Tabs value={activeTab} onChange={setActiveTab}>
+      <Tabs value={activeTab} onChange={(value: string | null) => setActiveTab(value ?? 'profile')}>
         <Tabs.List mb="md">
           <Tabs.Tab value="profile" leftSection={<IconUserCircle size={16} />}>
             Profil Bilgileri
