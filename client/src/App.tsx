@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MantineProvider, createTheme, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useLocalStorage } from '@mantine/hooks';
@@ -7,6 +7,8 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
 import Layout from './components/Layout';
+import PrivateRoute from './components/PrivateRoute';
+import { AuthProvider } from './contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import UserDetails from './pages/UserDetails';
 import TransferMoney from './pages/TransferMoney';
@@ -14,6 +16,9 @@ import TransactionHistory from './pages/TransactionHistory';
 import ProfileSettings from './pages/ProfileSettings';
 import QrTransfer from './pages/QrTransfer';
 import MoneyRequest from './pages/MoneyRequest';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import LandingPage from './pages/LandingPage';
 
 const theme = createTheme({
   primaryColor: 'blue',
@@ -55,19 +60,34 @@ function App() {
       <ColorSchemeScript />
       <MantineProvider theme={theme} defaultColorScheme={colorScheme}>
         <Notifications position="top-right" />
-        <Router>
-          <Routes>
-            <Route path="/" element={<Layout toggleColorScheme={toggleColorScheme} colorScheme={colorScheme} />}>
-              <Route index element={<Dashboard />} />
-              <Route path="users/:id" element={<UserDetails />} />
-              <Route path="transfer" element={<TransferMoney />} />
-              <Route path="qr-transfer" element={<QrTransfer />} />
-              <Route path="money-request" element={<MoneyRequest />} />
-              <Route path="history" element={<TransactionHistory />} />
-              <Route path="profile" element={<ProfileSettings />} />
-            </Route>
-          </Routes>
-        </Router>
+        <AuthProvider>
+          <Router>
+            <Routes>
+              {/* Genel Sayfalar */}
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              
+              {/* Korumalı Sayfalar */}
+              <Route path="/" element={
+                <PrivateRoute>
+                  <Layout toggleColorScheme={toggleColorScheme} colorScheme={colorScheme} />
+                </PrivateRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="users/:id" element={<UserDetails />} />
+                <Route path="transfer" element={<TransferMoney />} />
+                <Route path="qr-transfer" element={<QrTransfer />} />
+                <Route path="money-request" element={<MoneyRequest />} />
+                <Route path="history" element={<TransactionHistory />} />
+                <Route path="profile" element={<ProfileSettings />} />
+              </Route>
+              
+              {/* Yönlendirme */}
+              <Route path="*" element={<Navigate to="/landing" replace />} />
+            </Routes>
+          </Router>
+        </AuthProvider>
       </MantineProvider>
     </>
   );

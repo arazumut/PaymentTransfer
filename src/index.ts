@@ -8,6 +8,7 @@ import qrRoutes from './routes/qrRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import moneyRequestRoutes from './routes/moneyRequestRoutes';
+import authRoutes from './routes/authRoutes';
 import { logger } from './utils/logger';
 import { scheduleTransfers } from './services/schedulerService';
 import { initializeSocketIO } from './services/notificationService';
@@ -36,6 +37,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/transfer', transferRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/qr', qrRoutes);

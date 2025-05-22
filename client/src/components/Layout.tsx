@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { 
   AppShell, 
   NavLink as MantineNavLink, 
@@ -25,6 +25,7 @@ import {
   IconQrcode,
   IconArrowsExchange
 } from '@tabler/icons-react';
+import { useAuth } from '../contexts/AuthContext';
 import NotificationsMenu from './NotificationsMenu';
 
 interface LayoutProps {
@@ -33,6 +34,9 @@ interface LayoutProps {
 }
 
 const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  
   const navLinks = [
     { icon: <IconHome size={20} />, label: 'Ana Sayfa', to: '/' },
     { icon: <IconCreditCard size={20} />, label: 'Para Transferi', to: '/transfer' },
@@ -41,6 +45,11 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
     { icon: <IconHistory size={20} />, label: 'İşlem Geçmişi', to: '/history' },
     { icon: <IconUser size={20} />, label: 'Profil Ayarları', to: '/profile' },
   ];
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <AppShell
@@ -64,7 +73,7 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
                 {colorScheme === 'dark' ? <IconSun size={20} /> : <IconMoon size={20} />}
               </ActionIcon>
             </Tooltip>
-            <Button variant="subtle" leftSection={<IconLogout size={16} />}>
+            <Button variant="subtle" leftSection={<IconLogout size={16} />} onClick={handleLogout}>
               Çıkış
             </Button>
           </Group>
@@ -74,10 +83,12 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
       <AppShell.Navbar p="md">
         <Stack gap="xs">
           <Group mb="xs">
-            <Avatar color="blue" radius="xl" size="md">UA</Avatar>
+            <Avatar color="blue" radius="xl" size="md">
+              {user?.name?.substring(0, 2).toUpperCase() || 'UA'}
+            </Avatar>
             <div style={{ flex: 1 }}>
-              <Text fw={500}>Umut Araz</Text>
-              <Text size="xs" c="dimmed">umut.araz@example.com</Text>
+              <Text fw={500}>{user?.name || 'Kullanıcı'}</Text>
+              <Text size="xs" c="dimmed">{user?.email || 'kullanici@example.com'}</Text>
             </div>
             <ActionIcon variant="subtle" component={NavLink} to="/profile">
               <IconChevronRight size={16} />
