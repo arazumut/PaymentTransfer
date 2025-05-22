@@ -2,11 +2,11 @@ import prisma from './db';
 import { logger } from './logger';
 
 const users = [
-  { name: 'Ahmet Yılmaz', balance: 5000 },
-  { name: 'Ayşe Demir', balance: 3000 },
-  { name: 'Mehmet Kaya', balance: 8000 },
-  { name: 'Fatma Şahin', balance: 2000 },
-  { name: 'Mustafa Çelik', balance: 10000 },
+  { name: 'Ahmet Yılmaz', email: 'ahmet@example.com', balance: 5000 },
+  { name: 'Ayşe Demir', email: 'ayse@example.com', balance: 3000 },
+  { name: 'Mehmet Kaya', email: 'mehmet@example.com', balance: 8000 },
+  { name: 'Fatma Şahin', email: 'fatma@example.com', balance: 2000 },
+  { name: 'Mustafa Çelik', email: 'mustafa@example.com', balance: 10000 },
 ];
 
 async function seed() {

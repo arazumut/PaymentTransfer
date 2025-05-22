@@ -5,7 +5,7 @@ import { idempotencyMiddleware } from '../middlewares/idempotencyMiddleware';
 const router = express.Router();
 
 // Transfer rotaları
-router.post('/transfer', idempotencyMiddleware, createTransferHandler);
+router.post('/', idempotencyMiddleware, createTransferHandler);
 router.get('/transactions', getTransactionsHandler);
 
 export default router; 

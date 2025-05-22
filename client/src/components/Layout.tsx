@@ -21,7 +21,9 @@ import {
   IconSun, 
   IconUser,
   IconChevronRight,
-  IconStar
+  IconStar,
+  IconQrcode,
+  IconArrowsExchange
 } from '@tabler/icons-react';
 import NotificationsMenu from './NotificationsMenu';
 
@@ -34,9 +36,10 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
   const navLinks = [
     { icon: <IconHome size={20} />, label: 'Ana Sayfa', to: '/' },
     { icon: <IconCreditCard size={20} />, label: 'Para Transferi', to: '/transfer' },
+    { icon: <IconQrcode size={20} />, label: 'QR ile Transfer', to: '/qr-transfer' },
+    { icon: <IconArrowsExchange size={20} />, label: 'Para İste', to: '/money-request' },
     { icon: <IconHistory size={20} />, label: 'İşlem Geçmişi', to: '/history' },
     { icon: <IconUser size={20} />, label: 'Profil Ayarları', to: '/profile' },
-    { icon: <IconStar size={20} />, label: 'Favori Alıcılar', to: '/favorites' },
   ];
 
   return (

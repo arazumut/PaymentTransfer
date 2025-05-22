@@ -4,8 +4,8 @@ import { getAllUsers, getUser, addUser } from '../controllers/userController';
 const router = express.Router();
 
 // Kullanıcı rotaları
-router.get('/users', getAllUsers);
-router.get('/users/:id', getUser);
-router.post('/users', addUser);
+router.get('/', getAllUsers);
+router.get('/:id', getUser);
+router.post('/', addUser);
 
 export default router; 

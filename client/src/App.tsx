@@ -12,7 +12,8 @@ import UserDetails from './pages/UserDetails';
 import TransferMoney from './pages/TransferMoney';
 import TransactionHistory from './pages/TransactionHistory';
 import ProfileSettings from './pages/ProfileSettings';
-import FavoriteRecipients from './components/FavoriteRecipients';
+import QrTransfer from './pages/QrTransfer';
+import MoneyRequest from './pages/MoneyRequest';
 
 const theme = createTheme({
   primaryColor: 'blue',
@@ -60,9 +61,10 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="users/:id" element={<UserDetails />} />
               <Route path="transfer" element={<TransferMoney />} />
+              <Route path="qr-transfer" element={<QrTransfer />} />
+              <Route path="money-request" element={<MoneyRequest />} />
               <Route path="history" element={<TransactionHistory />} />
               <Route path="profile" element={<ProfileSettings />} />
-              <Route path="favorites" element={<FavoriteRecipients />} />
             </Route>
           </Routes>
         </Router>

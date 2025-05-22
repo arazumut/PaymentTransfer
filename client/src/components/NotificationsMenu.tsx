@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { 
   Menu, 
   ActionIcon, 
@@ -17,61 +16,28 @@ import {
   IconInfoCircle,
   IconSettings
 } from '@tabler/icons-react';
+import { useNotifications } from '../hooks/useSocket';
 
 interface Notification {
   id: number;
   title: string;
   message: string;
-  date: string;
+  createdAt: string;
   isRead: boolean;
   type: 'success' | 'warning' | 'info';
+  data?: Record<string, unknown>;
 }
 
 const NotificationsMenu = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: 'Para Transferi Başarılı',
-      message: 'Mehmet Demir\'e 500₺ transfer edildi.',
-      date: '10 dakika önce',
-      isRead: false,
-      type: 'success'
-    },
-    {
-      id: 2,
-      title: 'Güvenlik Uyarısı',
-      message: 'Hesabınızda şüpheli bir etkinlik tespit edildi.',
-      date: '2 saat önce',
-      isRead: false,
-      type: 'warning'
-    },
-    {
-      id: 3,
-      title: 'Profil Güncellendi',
-      message: 'Profil bilgileriniz başarıyla güncellendi.',
-      date: '1 gün önce',
-      isRead: true,
-      type: 'info'
-    }
-  ]);
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-
-  const markAsRead = (id: number) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, isRead: true } 
-          : notification
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, isRead: true }))
-    );
-  };
+  // Şu an için demo amaçlı sabit bir kullanıcı ID
+  const currentUserId = 1;
+  
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead 
+  } = useNotifications(currentUserId);
 
   const getIconForType = (type: Notification['type']) => {
     switch (type) {
@@ -96,6 +62,26 @@ const NotificationsMenu = () => {
         return 'blue';
       default:
         return 'gray';
+    }
+  };
+  
+  // Tarih formatı
+  const formatDate = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} dakika önce`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} saat önce`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays} gün önce`;
+    } else {
+      return date.toLocaleDateString('tr-TR');
     }
   };
 
@@ -161,7 +147,7 @@ const NotificationsMenu = () => {
                         {notification.message}
                       </Text>
                       <Text size="xs" c="dimmed" fs="italic" mt={4}>
-                        {notification.date}
+                        {formatDate(notification.createdAt)}
                       </Text>
                     </div>
                   </Group>

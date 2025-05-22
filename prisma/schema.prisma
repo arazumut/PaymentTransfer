@@ -13,13 +13,33 @@ datasource db {
 model User {
   id                Int             @id @default(autoincrement())
   name              String
+  email             String          @unique
+  password          String
   balance           Float           @default(0)
   sentTransactions     Transaction[]    @relation("SenderRelation")
   receivedTransactions Transaction[]    @relation("ReceiverRelation")
+  qrCodeTokens      QrCodeToken[]
+  favoriteOf        Favorite[]      @relation("UserFavorites")
+  favorites         Favorite[]      @relation("FavoriteUser")
+  notifications     Notification[]
+  sentRequests      MoneyRequest[]  @relation("RequesterRelation")
+  receivedRequests  MoneyRequest[]  @relation("RequestedRelation")
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   @@map("users")
+}
+
+model Favorite {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation("UserFavorites", fields: [userId], references: [id])
+  userId      Int
+  favorite    User      @relation("FavoriteUser", fields: [favoriteId], references: [id])
+  favoriteId  Int
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, favoriteId])
+  @@map("favorites")
 }
 
 model Transaction {
@@ -45,4 +65,46 @@ model IdempotencyKey {
   createdAt DateTime @default(now())
 
   @@map("idempotency_keys")
+}
+
+model QrCodeToken {
+  id          String    @id
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  amount      Float?
+  description String?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@map("qr_code_tokens")
+}
+
+model Notification {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  title       String
+  message     String
+  type        String    // success, warning, info
+  isRead      Boolean   @default(false)
+  data        String?   // JSON formatında ekstra veri
+  createdAt   DateTime  @default(now())
+
+  @@map("notifications")
+}
+
+model MoneyRequest {
+  id            Int       @id @default(autoincrement())
+  amount        Float
+  description   String?
+  status        String    @default("pending") // pending, approved, rejected, cancelled
+  requesterId   Int
+  requester     User      @relation("RequesterRelation", fields: [requesterId], references: [id])
+  requestedId   Int
+  requested     User      @relation("RequestedRelation", fields: [requestedId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  completedAt   DateTime?
+
+  @@map("money_requests")
 } 
