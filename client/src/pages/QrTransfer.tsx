@@ -30,6 +30,7 @@ import {
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
+import { useAuth } from '../contexts/AuthContext';
 
 interface QrScannerProps {
   onSuccess?: (data: any) => void;
@@ -179,9 +180,19 @@ export default function QrTransfer() {
   const [description, setDescription] = useState('');
   const [generatedQr, setGeneratedQr] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
   
-  // Şu an için demo amaçlı sabit bir kullanıcı ID
-  const currentUserId = 1;
+  // Kullanıcı giriş yapmamışsa yönlendir
+  useEffect(() => {
+    if (!user) {
+      notifications.show({
+        title: 'Giriş Gerekli',
+        message: 'Bu özelliği kullanmak için giriş yapmalısınız',
+        color: 'red'
+      });
+      navigate('/login');
+    }
+  }, [user, navigate]);
 
   // QR kodu tarandığında
   const handleQrSuccess = async (qrToken: string) => {
@@ -192,11 +203,12 @@ export default function QrTransfer() {
       const response = await fetch('http://localhost:3000/api/qr/verify', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ 
           qrToken,
-          senderId: currentUserId
+          senderId: user?.id
         })
       });
       
@@ -230,7 +242,7 @@ export default function QrTransfer() {
 
   // Transfer işlemi
   const handleTransfer = async () => {
-    if (!qrData) return;
+    if (!qrData || !user) return;
     
     setIsSubmitting(true);
     
@@ -238,10 +250,11 @@ export default function QrTransfer() {
       const response = await fetch('http://localhost:3000/api/transfer', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          senderId: currentUserId,
+          senderId: user.id,
           receiverId: qrData.receiverId,
           amount: qrData.amount || amount,
           description: qrData.description || description
@@ -284,14 +297,17 @@ export default function QrTransfer() {
 
   // QR kod oluştur
   const generateQrCode = async () => {
+    if (!user) return;
+    
     try {
       const response = await fetch('http://localhost:3000/api/qr/generate', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          userId: currentUserId,
+          userId: user.id,
           amount: amount || undefined,
           description: description || undefined
         })
@@ -323,7 +339,7 @@ export default function QrTransfer() {
   };
 
   return (
-    <Stack spacing="lg">
+    <Stack gap="lg">
       <Title order={2}>QR Kod ile Para Transferi</Title>
       
       <Group grow>
@@ -366,7 +382,7 @@ export default function QrTransfer() {
                 placeholder="Gönderilecek tutarı girin"
                 min={1}
                 value={amount}
-                onChange={setAmount}
+                onChange={(val) => setAmount(val)}
                 withAsterisk
               />
             )}
@@ -417,7 +433,7 @@ export default function QrTransfer() {
         size="lg"
         centered
       >
-        <Stack spacing="md">
+        <Stack gap="md">
           <Text size="sm">
             Başkaları tarafından taranarak size para transferi yapılmasını sağlayan bir QR kod oluşturun. 
             Tutarı belirtirseniz, tarayanlar tam o tutarı gönderebilir.
@@ -429,7 +445,7 @@ export default function QrTransfer() {
             placeholder="Tutarı girin"
             min={0}
             value={amount}
-            onChange={setAmount}
+            onChange={(val) => setAmount(val)}
           />
           
           <TextInput

@@ -32,6 +32,7 @@ import {
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
+import { useAuth } from '../contexts/AuthContext';
 
 interface User {
   id: number;
@@ -68,9 +69,10 @@ export default function MoneyRequestPage() {
   const [isOpenDetailModal, setIsOpenDetailModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<MoneyRequest | null>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
   
-  // Şu an için demo amaçlı sabit bir kullanıcı ID
-  const currentUserId = 1;
+  // Şu an için demo amaçlı sabit bir kullanıcı ID yerine oturum açmış kullanıcı bilgisini kullan
+  const currentUserId = user?.id || 1;
 
   // Kullanıcıları getir
   useEffect(() => {
@@ -129,7 +131,7 @@ export default function MoneyRequestPage() {
 
   // Para isteği oluştur
   const handleCreateRequest = async () => {
-    if (!selectedUser || !amount) {
+    if (!selectedUser || !amount || !user) {
       notifications.show({
         title: 'Eksik Bilgi',
         message: 'Lütfen alıcı ve tutar bilgilerini eksiksiz doldurun',
@@ -144,10 +146,11 @@ export default function MoneyRequestPage() {
       const response = await fetch('http://localhost:3000/api/money-requests', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          requesterId: currentUserId,
+          requesterId: user.id,
           requestedId: parseInt(selectedUser),
           amount,
           description
@@ -188,13 +191,32 @@ export default function MoneyRequestPage() {
     }
   };
 
+  // İstek güncelleme yardımcı fonksiyonu
+  const updateRequestStatus = (requestId: number, newStatus: 'approved' | 'rejected' | 'cancelled') => {
+    const updateRequests = (requests: MoneyRequest[]) => {
+      return requests.map(req => 
+        req.id === requestId 
+          ? { 
+              ...req, 
+              status: newStatus,
+              completedAt: new Date().toISOString()
+            } as MoneyRequest
+          : req
+      );
+    };
+    
+    setSentRequests(updateRequests(sentRequests));
+    setReceivedRequests(updateRequests(receivedRequests));
+  };
+
   // Para isteğine yanıt ver
   const respondToRequest = async (requestId: number, action: 'approve' | 'reject' | 'cancel') => {
     try {
       const response = await fetch(`http://localhost:3000/api/money-requests/${requestId}/respond`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ action })
       });
@@ -209,24 +231,12 @@ export default function MoneyRequestPage() {
         });
         
         // İstek listelerini güncelle
-        const updateRequests = (requests: MoneyRequest[]) => {
-          return requests.map(req => 
-            req.id === requestId 
-              ? { 
-                  ...req, 
-                  status: action === 'approve' 
-                    ? 'approved' 
-                    : action === 'reject' 
-                    ? 'rejected' 
-                    : 'cancelled',
-                  completedAt: new Date().toISOString()
-                } 
-              : req
-          );
-        };
-        
-        setSentRequests(updateRequests(sentRequests));
-        setReceivedRequests(updateRequests(receivedRequests));
+        updateRequestStatus(
+          requestId, 
+          action === 'approve' ? 'approved' : 
+          action === 'reject' ? 'rejected' : 
+          'cancelled'
+        );
         
         // Modal'ı kapat
         if (isOpenDetailModal) {
@@ -239,7 +249,7 @@ export default function MoneyRequestPage() {
           color: 'red'
         });
       }
-    } catch (error) {
+    } catch (err) {
       notifications.show({
         title: 'Hata',
         message: 'İşlem sırasında bir hata oluştu',
@@ -291,20 +301,20 @@ export default function MoneyRequestPage() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
+      <Box style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
         <Loader size="xl" />
       </Box>
     );
   }
 
   return (
-    <Stack spacing="xl">
+    <Stack gap="xl">
       <Title order={2}>Para İstekleri</Title>
       
       <Paper p="md" withBorder>
         <Title order={3} mb="md">Yeni Para İsteği Oluştur</Title>
         
-        <Stack spacing="md">
+        <Stack gap="md">
           <Select
             label="Kimden İsteniyor"
             placeholder="Para isteyeceğiniz kişiyi seçin"
@@ -313,7 +323,7 @@ export default function MoneyRequestPage() {
             onChange={setSelectedUser}
             searchable
             clearable
-            icon={<IconUsers size={16} />}
+            leftSection={<IconUsers size={16} />}
             withAsterisk
           />
           
@@ -322,8 +332,8 @@ export default function MoneyRequestPage() {
             placeholder="İstenilen tutarı girin"
             min={1}
             value={amount}
-            onChange={setAmount}
-            icon={<IconCashBanknote size={16} />}
+            onChange={(val) => setAmount(val)}
+            leftSection={<IconCashBanknote size={16} />}
             withAsterisk
           />
           
@@ -370,7 +380,7 @@ export default function MoneyRequestPage() {
                 
                 return (
                   <Card key={request.id} withBorder shadow="sm">
-                    <Group position="apart">
+                    <Group justify="apart">
                       <Group>
                         <Avatar color="blue" radius="xl">
                           {request.requester.name.charAt(0).toUpperCase()}
@@ -385,13 +395,13 @@ export default function MoneyRequestPage() {
                       <Badge color={status.color} leftSection={status.icon}>{status.text}</Badge>
                     </Group>
                     
-                    <Group position="apart" mt="md">
+                    <Group justify="apart" mt="md">
                       <Text size="xl" fw={700}>
                         {formatCurrency(request.amount)}
                       </Text>
                       
                       {request.status === 'pending' && (
-                        <Group spacing="xs">
+                        <Group gap="xs">
                           <Button
                             size="xs"
                             color="green"
@@ -437,7 +447,7 @@ export default function MoneyRequestPage() {
                 
                 return (
                   <Card key={request.id} withBorder shadow="sm">
-                    <Group position="apart">
+                    <Group justify="apart">
                       <Group>
                         <Avatar color="blue" radius="xl">
                           {request.requested.name.charAt(0).toUpperCase()}
@@ -452,7 +462,7 @@ export default function MoneyRequestPage() {
                       <Badge color={status.color} leftSection={status.icon}>{status.text}</Badge>
                     </Group>
                     
-                    <Group position="apart" mt="md">
+                    <Group justify="apart" mt="md">
                       <Text size="xl" fw={700}>
                         {formatCurrency(request.amount)}
                       </Text>
@@ -490,49 +500,49 @@ export default function MoneyRequestPage() {
       >
         {selectedRequest && (
           <Stack>
-            <Group position="apart">
+            <Group justify="apart">
               <Text fw={500}>Durum:</Text>
               <Badge color={getStatusInfo(selectedRequest.status).color}>
                 {getStatusInfo(selectedRequest.status).text}
               </Badge>
             </Group>
             
-            <Group position="apart">
+            <Group justify="apart">
               <Text fw={500}>İsteyen:</Text>
               <Text>{selectedRequest.requester.name}</Text>
             </Group>
             
-            <Group position="apart">
+            <Group justify="apart">
               <Text fw={500}>İstenen:</Text>
               <Text>{selectedRequest.requested.name}</Text>
             </Group>
             
-            <Group position="apart">
+            <Group justify="apart">
               <Text fw={500}>Tutar:</Text>
               <Text>{formatCurrency(selectedRequest.amount)}</Text>
             </Group>
             
             {selectedRequest.description && (
-              <Group position="apart">
+              <Group justify="apart">
                 <Text fw={500}>Açıklama:</Text>
                 <Text>{selectedRequest.description}</Text>
               </Group>
             )}
             
-            <Group position="apart">
+            <Group justify="apart">
               <Text fw={500}>Oluşturulma Tarihi:</Text>
               <Text>{formatDate(selectedRequest.createdAt)}</Text>
             </Group>
             
             {selectedRequest.completedAt && (
-              <Group position="apart">
+              <Group justify="apart">
                 <Text fw={500}>Tamamlanma Tarihi:</Text>
                 <Text>{formatDate(selectedRequest.completedAt)}</Text>
               </Group>
             )}
             
             {selectedRequest.status === 'pending' && (
-              <Group position="right" mt="md">
+              <Group justify="right" mt="md">
                 {selectedRequest.requester.id === currentUserId ? (
                   <Button
                     color="gray"
