@@ -4,16 +4,17 @@ import {
   respondToRequestHandler, 
   getMoneyRequestsHandler 
 } from '../controllers/moneyRequestController';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-// Para isteği oluştur
-router.post('/', createMoneyRequestHandler);
+// Para isteği oluştur - Yetkilendirme gerektirir
+router.post('/', authMiddleware, createMoneyRequestHandler);
 
-// Para isteğine yanıt ver
-router.put('/:id/respond', respondToRequestHandler);
+// Para isteğine yanıt ver - Yetkilendirme gerektirir
+router.put('/:id/respond', authMiddleware, respondToRequestHandler);
 
-// Kullanıcının para isteklerini getir
-router.get('/user/:userId', getMoneyRequestsHandler);
+// Kullanıcının para isteklerini getir - Yetkilendirme gerektirir
+router.get('/user/:userId', authMiddleware, getMoneyRequestsHandler);
 
 export default router;
