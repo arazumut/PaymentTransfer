@@ -8,6 +8,10 @@ import qrRoutes from './routes/qrRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import moneyRequestRoutes from './routes/moneyRequestRoutes';
+import scheduledPaymentRoutes from './routes/scheduledPaymentRoutes';
+import budgetRoutes from './routes/budgetRoutes';
+import loyaltyRoutes from './routes/loyaltyRoutes';
+import categoryRoutes from './routes/categoryRoutes';
 import authRoutes from './routes/authRoutes';
 import { logger } from './utils/logger';
 import { scheduleTransfers } from './services/schedulerService';
@@ -44,6 +48,10 @@ app.use('/api/qr', qrRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/money-requests', moneyRequestRoutes);
+app.use('/api/scheduled-payments', scheduledPaymentRoutes);
+app.use('/api/budgets', budgetRoutes);
+app.use('/api/loyalty', loyaltyRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

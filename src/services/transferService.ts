@@ -1,5 +1,6 @@
 import prisma from '../utils/db';
 import { logger } from '../utils/logger';
+import { earnPointsFromTransfer } from '../controllers/loyaltyController';
 
 interface TransferData {
   senderId: number;
@@ -93,6 +94,15 @@ export const executeTransfer = async (
     });
 
     logger.info(`Transfer tamamlandı: #${transaction.id}, ${amount} TL`);
+    
+    // Transfer sonrası sadakat puanı kazanımı (async olarak işle)
+    setTimeout(async () => {
+      try {
+        await earnPointsFromTransfer(senderId, amount);
+      } catch (error) {
+        logger.error('Sadakat puanı ekleme hatası:', error);
+      }
+    }, 0);
     
     return {
       transaction,

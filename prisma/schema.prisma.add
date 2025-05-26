@@ -1,0 +1,81 @@
+model ScheduledPayment {
+  id                Int       @id @default(autoincrement())
+  sender            User      @relation("ScheduledSenderRelation", fields: [senderId], references: [id])
+  senderId          Int
+  receiver          User      @relation("ScheduledReceiverRelation", fields: [receiverId], references: [id])
+  receiverId        Int
+  amount            Float
+  description       String?
+  frequency         String    // daily, weekly, monthly, yearly
+  nextExecutionDate DateTime
+  lastExecutionDate DateTime?
+  endDate           DateTime?
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("scheduled_payments")
+}
+
+model SpendingCategory {
+  id          Int       @id @default(autoincrement())
+  name        String
+  icon        String?
+  color       String?
+  transactions TransactionCategory[]
+  budgets     Budget[]
+  createdAt   DateTime  @default(now())
+
+  @@map("spending_categories")
+}
+
+model TransactionCategory {
+  id            Int             @id @default(autoincrement())
+  transaction   Transaction     @relation(fields: [transactionId], references: [id])
+  transactionId Int
+  category      SpendingCategory @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  createdAt     DateTime        @default(now())
+
+  @@unique([transactionId, categoryId])
+  @@map("transaction_categories")
+}
+
+model Budget {
+  id          Int             @id @default(autoincrement())
+  user        User            @relation(fields: [userId], references: [id])
+  userId      Int
+  category    SpendingCategory @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  amount      Float
+  period      String          // monthly, yearly
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("budgets")
+}
+
+model LoyaltyPoints {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int       @unique
+  points      Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("loyalty_points")
+}
+
+model LoyaltyTransaction {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  points      Int
+  description String
+  type        String    // earn, spend, bonus
+  createdAt   DateTime  @default(now())
+
+  @@map("loyalty_transactions")
+}

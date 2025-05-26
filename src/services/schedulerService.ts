@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { getPendingScheduledTransfers, executeTransfer } from './transferService';
+import { executeScheduledPayments } from './scheduledPaymentService';
 import { logger } from '../utils/logger';
 
 export const processScheduledTransfers = async () => {
@@ -40,7 +41,8 @@ export const scheduleTransfers = () => {
   // Her dakika çalışacak şekilde ayarla
   cron.schedule('* * * * *', async () => {
     await processScheduledTransfers();
+    await executeScheduledPayments();
   });
   
-  logger.info('Zamanlı transfer işleme servisi başlatıldı');
+  logger.info('Zamanlı transfer ve ödeme işleme servisi başlatıldı');
 }; 
