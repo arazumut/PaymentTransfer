@@ -15,6 +15,8 @@ import TransferMoney from './pages/TransferMoney';
 import TransactionHistory from './pages/TransactionHistory';
 import ProfileSettings from './pages/ProfileSettings';
 import QrTransfer from './pages/QrTransfer';
+import QrHistory from './pages/QrHistory';
+import QrGenerator from './pages/QrGenerator';
 import MoneyRequest from './pages/MoneyRequest';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -78,6 +80,8 @@ function App() {
                 <Route path="users/:id" element={<UserDetails />} />
                 <Route path="transfer" element={<TransferMoney />} />
                 <Route path="qr-transfer" element={<QrTransfer />} />
+                <Route path="qr-history" element={<QrHistory />} />
+                <Route path="qr-generator" element={<QrGenerator />} />
                 <Route path="money-request" element={<MoneyRequest />} />
                 <Route path="history" element={<TransactionHistory />} />
                 <Route path="profile" element={<ProfileSettings />} />

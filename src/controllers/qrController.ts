@@ -1,10 +1,11 @@
+// filepath: /Users/umutaraz/Desktop/Tüm hayatım burda/moneyTrans/src/controllers/qrController.ts
 import { Request, Response } from 'express';
-import { createQrCode, verifyQrCode } from '../services/qrService';
+import { createQrCode, verifyQrCode, QrCodeType } from '../services/qrService';
 import { logger } from '../utils/logger';
 
 export const generateQrCodeHandler = async (req: Request, res: Response) => {
   try {
-    const { userId, amount, description } = req.body;
+    const { userId, amount, description, type, recurringInterval, maxUsageCount } = req.body;
     
     // Validasyon
     if (!userId) {
@@ -17,6 +18,7 @@ export const generateQrCodeHandler = async (req: Request, res: Response) => {
     // Sayı tipine dönüştür
     const userIdNum = parseInt(userId);
     const amountNum = amount ? parseFloat(amount) : undefined;
+    const maxUsageCountNum = maxUsageCount ? parseInt(maxUsageCount) : undefined;
     
     // Geçerli değerler mi kontrol et
     if (isNaN(userIdNum)) {
@@ -33,11 +35,43 @@ export const generateQrCodeHandler = async (req: Request, res: Response) => {
       });
     }
     
+    if (maxUsageCountNum !== undefined && (isNaN(maxUsageCountNum) || maxUsageCountNum <= 0)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Maksimum kullanım sayısı pozitif bir sayı olmalıdır'
+      });
+    }
+    
+    // QR kod tipi kontrolü
+    let qrType: QrCodeType | undefined = undefined;
+    
+    if (type) {
+      if (Object.values(QrCodeType).includes(type as QrCodeType)) {
+        qrType = type as QrCodeType;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Geçersiz QR kod tipi'
+        });
+      }
+    }
+    
+    // Tekrarlı ödeme tipi için periyot zorunlu
+    if (qrType === QrCodeType.RECURRING && !recurringInterval) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tekrarlı ödemeler için periyot belirtilmelidir'
+      });
+    }
+    
     // QR kod oluştur
     const qrCode = await createQrCode({
       userId: userIdNum,
       amount: amountNum,
-      description
+      description,
+      type: qrType,
+      recurringInterval,
+      maxUsageCount: maxUsageCountNum
     });
     
     res.status(201).json({

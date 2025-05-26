@@ -68,13 +68,18 @@ model IdempotencyKey {
 }
 
 model QrCodeToken {
-  id          String    @id
-  userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  amount      Float?
-  description String?
-  expiresAt   DateTime
-  createdAt   DateTime  @default(now())
+  id                String    @id
+  userId            Int
+  user              User      @relation(fields: [userId], references: [id])
+  amount            Float?
+  description       String?
+  expiresAt         DateTime
+  type              String    @default("standard") // standard, fixed, open, recurring
+  recurringInterval String?   // daily, weekly, monthly
+  maxUsageCount     Int?      // maksimum kullanım sayısı, null sınırsız
+  usageCount        Int       @default(0)
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
 
   @@map("qr_code_tokens")
 }

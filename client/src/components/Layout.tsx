@@ -21,7 +21,6 @@ import {
   IconSun, 
   IconUser,
   IconChevronRight,
-  IconStar,
   IconQrcode,
   IconArrowsExchange
 } from '@tabler/icons-react';
@@ -41,6 +40,8 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
     { icon: <IconHome size={20} />, label: 'Ana Sayfa', to: '/' },
     { icon: <IconCreditCard size={20} />, label: 'Para Transferi', to: '/transfer' },
     { icon: <IconQrcode size={20} />, label: 'QR ile Transfer', to: '/qr-transfer' },
+    { icon: <IconQrcode size={20} />, label: 'QR Geçmişi', to: '/qr-history' },
+    { icon: <IconQrcode size={20} />, label: 'Gelişmiş QR Oluştur', to: '/qr-generator' },
     { icon: <IconArrowsExchange size={20} />, label: 'Para İste', to: '/money-request' },
     { icon: <IconHistory size={20} />, label: 'İşlem Geçmişi', to: '/history' },
     { icon: <IconUser size={20} />, label: 'Profil Ayarları', to: '/profile' },
