@@ -18,6 +18,9 @@ import QrTransfer from './pages/QrTransfer';
 import QrHistory from './pages/QrHistory';
 import QrGenerator from './pages/QrGenerator';
 import MoneyRequest from './pages/MoneyRequest';
+import ScheduledPayments from './pages/ScheduledPayments';
+import BudgetTracker from './pages/BudgetTracker';
+import LoyaltyDashboard from './pages/LoyaltyDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import LandingPage from './pages/LandingPage';
@@ -85,6 +88,9 @@ function App() {
                 <Route path="money-request" element={<MoneyRequest />} />
                 <Route path="history" element={<TransactionHistory />} />
                 <Route path="profile" element={<ProfileSettings />} />
+                <Route path="scheduled-payments" element={<ScheduledPayments />} />
+                <Route path="budget-tracker" element={<BudgetTracker />} />
+                <Route path="loyalty" element={<LoyaltyDashboard />} />
               </Route>
               
               {/* Yönlendirme */}

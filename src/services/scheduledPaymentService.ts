@@ -1,6 +1,6 @@
 import prisma from '../utils/db';
 import { logger } from '../utils/logger';
-import { transferMoney } from './transferService';
+import { executeTransfer } from './transferService';
 
 interface ScheduledPaymentData {
   senderId: number;
@@ -233,12 +233,12 @@ export const executeScheduledPayments = async () => {
     for (const payment of pendingPayments) {
       try {
         // Transfer işlemini gerçekleştir
-        await transferMoney({
-          senderId: payment.senderId,
-          receiverId: payment.receiverId,
-          amount: payment.amount,
-          description: payment.description || `Otomatik ödeme #${payment.id}`
-        });
+        await executeTransfer(
+          payment.senderId,
+          payment.receiverId,
+          payment.amount,
+          payment.description || `Otomatik ödeme #${payment.id}`
+        );
 
         // Sonraki ödeme tarihini hesapla
         const nextDate = calculateNextExecutionDate(payment.nextExecutionDate, payment.frequency);

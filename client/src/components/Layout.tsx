@@ -22,7 +22,10 @@ import {
   IconUser,
   IconChevronRight,
   IconQrcode,
-  IconArrowsExchange
+  IconArrowsExchange,
+  IconCalendarEvent,
+  IconChartPie,
+  IconGift
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationsMenu from './NotificationsMenu';
