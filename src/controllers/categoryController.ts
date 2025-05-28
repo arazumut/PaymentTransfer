@@ -30,7 +30,7 @@ export const getAllCategories = async (req: Request, res: Response) => {
  */
 export const createCategory = async (req: Request, res: Response) => {
   try {
-    const { name, description, color } = req.body;
+    const { name, color } = req.body;
     
     // Admin yetkisi kontrolü yapılabilir
 
@@ -40,7 +40,9 @@ export const createCategory = async (req: Request, res: Response) => {
 
     // Aynı isimde kategori var mı kontrol et
     const existingCategory = await prisma.spendingCategory.findFirst({
-      where: { name: { equals: name, mode: 'insensitive' } }
+      where: { 
+        name: name
+      }
     });
 
     if (existingCategory) {
@@ -51,7 +53,6 @@ export const createCategory = async (req: Request, res: Response) => {
     const category = await prisma.spendingCategory.create({
       data: {
         name,
-        description,
         color
       }
     });
