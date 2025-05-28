@@ -3,19 +3,24 @@ import { Container, Typography, Box, Paper, Grid, Card,
   CardContent, Divider, List, ListItem, ListItemText, 
   Chip, CircularProgress, Pagination, 
   Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow } from '@mui/material';
+  TableHead, TableRow, Tab, Tabs } from '@mui/material';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { 
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   Loyalty as LoyaltyIcon,
-  CardGiftcard as CardGiftcardIcon
+  CardGiftcard as CardGiftcardIcon,
+  EmojiEvents as TrophyIcon,
+  Timeline as TimelineIcon,
+  ArrowUpward as UpgradeIcon,
+  Stars as StarsIcon
 } from '@mui/icons-material';
 import api from '../services/api';
 import { useSnackbar } from 'notistack';
 
 const LoyaltyDashboard = () => {
+  const [userData, setUserData] = useState(null);
   const [loyaltyData, setLoyaltyData] = useState(null);
   const [transactions, setTransactions] = useState({ transactions: [], pagination: {} });
   const [loading, setLoading] = useState(true);

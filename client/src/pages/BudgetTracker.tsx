@@ -16,6 +16,7 @@ import { PieChart } from '@mui/x-charts/PieChart';
 const BudgetTracker = () => {
   const [budgets, setBudgets] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [spendingData, setSpendingData] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -38,19 +39,19 @@ const BudgetTracker = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const [budgetsRes, categoriesRes, analyticsRes] = await Promise.all([
+          api.get('/budgets'),
+          api.get('/categories'),
+          api.get('/categories/analytics?period=month')
+        ]);
         
-        // Kategorileri getir
-        const categoriesResponse = await api.get('/categories');
-        setCategories(categoriesResponse.data);
-        
-        // Bütçeleri getir
-        const budgetsResponse = await api.get('/budgets');
-        setBudgets(budgetsResponse.data);
-        
+        setBudgets(budgetsRes.data);
+        setCategories(categoriesRes.data);
+        setSpendingData(analyticsRes.data);
         setLoading(false);
       } catch (error) {
         console.error('Veri alınırken hata:', error);
-        enqueueSnackbar('Bütçeler yüklenemedi', { variant: 'error' });
+        enqueueSnackbar('Veriler yüklenemedi', { variant: 'error' });
         setLoading(false);
       }
     };
@@ -78,11 +79,6 @@ const BudgetTracker = () => {
   // Yeni bütçe oluştur
   const handleSubmit = async () => {
     try {
-      // Başlangıç tarihi bitiş tarihinden önce olmalı
-      if (isAfter(new Date(formData.startDate), new Date(formData.endDate))) {
-        return enqueueSnackbar('Başlangıç tarihi bitiş tarihinden önce olmalıdır', { variant: 'error' });
-      }
-      
       await api.post('/budgets', formData);
       setDialogOpen(false);
       
@@ -95,14 +91,17 @@ const BudgetTracker = () => {
         endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
       });
       
-      // Listeyi güncelle
+      // Bütçeleri güncelle
       const response = await api.get('/budgets');
       setBudgets(response.data);
       
       enqueueSnackbar('Bütçe başarıyla oluşturuldu', { variant: 'success' });
     } catch (error) {
       console.error('Bütçe oluşturma hatası:', error);
-      enqueueSnackbar(error.response?.data?.message || 'Bütçe oluşturulamadı', { variant: 'error' });
+      enqueueSnackbar(
+        error.response?.data?.message || 'Bütçe oluşturulamadı', 
+        { variant: 'error' }
+      );
     }
   };
 
@@ -177,29 +176,38 @@ const BudgetTracker = () => {
     }
   };
 
-  // Periyot adını formatla
+  // Kategori adını bul
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : 'Bilinmeyen Kategori';
+  };
+
+  // Kategori rengini bul
+  const getCategoryColor = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category?.color || '#808080';
+  };
+
+  // Dönem adını formatla
   const formatPeriod = (period) => {
-    const map = {
-      monthly: 'Aylık',
-      yearly: 'Yıllık'
-    };
-    return map[period] || period;
+    return period === 'monthly' ? 'Aylık' : 'Yıllık';
   };
 
-  // İlerleme durumunu hesapla
-  const calculateProgress = (budget) => {
-    if (budgetDetails && selectedBudget?.id === budget.id) {
-      return budgetDetails.progress;
-    }
-    // Yaklaşık bir ilerleme göster (daha sonra detaylar yüklenince güncellenecek)
-    return Math.round(Math.random() * 100);
+  // Harcama yüzdesini hesapla
+  const calculateSpendingPercentage = (budget) => {
+    const categorySpending = spendingData.find(item => item.categoryId === budget.categoryId);
+    const spent = categorySpending ? categorySpending.totalAmount : 0;
+    return Math.min(100, Math.round((spent / budget.amount) * 100));
   };
 
-  // İlerleme rengini hesapla
-  const getProgressColor = (progress) => {
-    if (progress > 90) return 'error';
-    if (progress > 75) return 'warning';
-    return 'success';
+  // Pasta grafik verilerini oluştur
+  const generateChartData = () => {
+    return budgets.map(budget => ({
+      id: budget.id,
+      value: parseFloat(budget.amount),
+      label: getCategoryName(budget.categoryId),
+      color: getCategoryColor(budget.categoryId)
+    }));
   };
 
   return (
@@ -236,62 +244,159 @@ const BudgetTracker = () => {
           </Paper>
         ) : (
           <Grid container spacing={3}>
-            {budgets.map((budget) => (
-              <Grid item xs={12} sm={6} md={4} key={budget.id}>
-                <Card>
-                  <CardContent>
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography variant="h6" gutterBottom>
-                        {budget.category.name}
-                      </Typography>
-                      <Chip 
-                        color="primary" 
-                        label={formatPeriod(budget.period)} 
-                        size="small" 
-                      />
-                    </Box>
-                    
-                    <Typography variant="h5" component="div" color="primary" gutterBottom>
-                      {budget.amount} TL
-                    </Typography>
-                    
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        İlerleme
-                      </Typography>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={calculateProgress(budget)} 
-                        color={getProgressColor(calculateProgress(budget))}
-                        sx={{ height: 10, borderRadius: 5, my: 1 }}
-                      />
-                    </Box>
-                    
-                    <Typography variant="body2" color="text.secondary">
-                      Süre: {format(new Date(budget.startDate), 'dd.MM.yyyy', { locale: tr })} - 
-                      {format(new Date(budget.endDate), 'dd.MM.yyyy', { locale: tr })}
-                    </Typography>
-                  </CardContent>
-                  
-                  <CardActions>
-                    <Button size="small" onClick={() => handleViewDetails(budget)}>
-                      Detaylar
-                    </Button>
-                    <Button size="small" startIcon={<EditIcon />} onClick={() => handleEditClick(budget)}>
-                      Düzenle
-                    </Button>
+            {/* Bütçe Özeti */}
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, height: '100%' }}>
+                <Typography variant="h6" gutterBottom>
+                  Bütçe Dağılımı
+                </Typography>
+                
+                <Box sx={{ height: 300 }}>
+                  <PieChart
+                    series={[
+                      {
+                        data: generateChartData(),
+                        highlightScope: { faded: 'global', highlighted: 'item' },
+                        faded: { innerRadius: 30, additionalRadius: -30 },
+                      },
+                    ]}
+                    height={300}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* Bütçe Durumu */}
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, height: '100%' }}>
+                <Typography variant="h6" gutterBottom>
+                  Harcama Durumu
+                </Typography>
+                
+                {budgets.length === 0 ? (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    height: 300
+                  }}>
                     <Button 
-                      size="small" 
-                      color="error" 
-                      startIcon={<DeleteIcon />}
-                      onClick={() => handleDelete(budget.id)}
+                      variant="outlined" 
+                      onClick={() => setDialogOpen(true)}
                     >
-                      Sil
+                      İlk Bütçenizi Oluşturun
                     </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))}
+                  </Box>
+                ) : (
+                  <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
+                    {budgets.map(budget => {
+                      const percentage = calculateSpendingPercentage(budget);
+                      return (
+                        <Box key={budget.id} sx={{ mb: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2">
+                              {getCategoryName(budget.categoryId)}
+                            </Typography>
+                            <Typography variant="body2">
+                              {percentage}% Kullanıldı
+                            </Typography>
+                          </Box>
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={percentage} 
+                            sx={{ 
+                              height: 10, 
+                              borderRadius: 5,
+                              backgroundColor: 'rgba(0,0,0,0.1)',
+                              '& .MuiLinearProgress-bar': {
+                                backgroundColor: getCategoryColor(budget.categoryId)
+                              }
+                            }}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+              </Paper>
+            </Grid>
+
+            {/* Bütçe Listesi */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                Tüm Bütçeler
+              </Typography>
+              
+              {budgets.length === 0 ? (
+                <Paper sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography variant="body1">
+                    Henüz bütçe oluşturmadınız
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    sx={{ mt: 2 }}
+                    onClick={() => setDialogOpen(true)}
+                  >
+                    İlk Bütçenizi Oluşturun
+                  </Button>
+                </Paper>
+              ) : (
+                <Grid container spacing={2}>
+                  {budgets.map(budget => (
+                    <Grid item xs={12} sm={6} md={4} key={budget.id}>
+                      <Card sx={{ 
+                        height: '100%',
+                        borderTop: `4px solid ${getCategoryColor(budget.categoryId)}`
+                      }}>
+                        <CardContent>
+                          <Typography variant="h6" gutterBottom>
+                            {getCategoryName(budget.categoryId)}
+                          </Typography>
+                          
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="body2" color="textSecondary">
+                              Bütçe Miktarı
+                            </Typography>
+                            <Typography variant="h5">
+                              {budget.amount} TL
+                            </Typography>
+                          </Box>
+                          
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="body2" color="textSecondary">
+                              Dönem
+                            </Typography>
+                            <Typography variant="body1">
+                              {formatPeriod(budget.period)}
+                            </Typography>
+                          </Box>
+                          
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={calculateSpendingPercentage(budget)} 
+                            sx={{ 
+                              mt: 2,
+                              height: 8, 
+                              borderRadius: 4
+                            }}
+                          />
+                          
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            sx={{ mt: 2 }}
+                            onClick={() => handleDelete(budget.id)}
+                          >
+                            Bütçeyi Sil
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Grid>
           </Grid>
         )}
       </Box>
@@ -323,7 +428,7 @@ const BudgetTracker = () => {
               fullWidth
               margin="normal"
               name="amount"
-              label="Bütçe Tutarı (TL)"
+              label="Bütçe Miktarı (TL)"
               type="number"
               value={formData.amount}
               onChange={handleChange}
@@ -334,13 +439,13 @@ const BudgetTracker = () => {
             />
 
             <FormControl fullWidth margin="normal">
-              <InputLabel id="period-label">Periyot</InputLabel>
+              <InputLabel id="period-label">Bütçe Dönemi</InputLabel>
               <Select
                 labelId="period-label"
                 name="period"
                 value={formData.period}
                 onChange={handleChange}
-                label="Periyot"
+                label="Bütçe Dönemi"
                 required
               >
                 <MenuItem value="monthly">Aylık</MenuItem>
