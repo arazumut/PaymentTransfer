@@ -47,6 +47,9 @@ const Layout = ({ toggleColorScheme, colorScheme }: LayoutProps) => {
     { icon: <IconQrcode size={20} />, label: 'Gelişmiş QR Oluştur', to: '/qr-generator' },
     { icon: <IconArrowsExchange size={20} />, label: 'Para İste', to: '/money-request' },
     { icon: <IconHistory size={20} />, label: 'İşlem Geçmişi', to: '/history' },
+    { icon: <IconCalendarEvent size={20} />, label: 'Planlı Ödemeler', to: '/scheduled-payments' },
+    { icon: <IconChartPie size={20} />, label: 'Bütçe Takibi', to: '/budget-tracker' },
+    { icon: <IconGift size={20} />, label: 'Sadakat Programı', to: '/loyalty' },
     { icon: <IconUser size={20} />, label: 'Profil Ayarları', to: '/profile' },
   ];
   
